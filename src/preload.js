@@ -6,5 +6,9 @@ contextBridge.exposeInMainWorld("markdown_it", {
     render: (content) =>
         ipcRenderer.invoke("LiteLoader.markdown_it.render", content),
     open_link: (content) =>
-        ipcRenderer.invoke("LiteLoader.markdown_it.open_link", content)
+        ipcRenderer.invoke("LiteLoader.markdown_it.open_link", content),
+    save_config: (config) =>
+        ipcRenderer.invoke("LiteLoader.markdown_it.save_config", config),
+    get_now_config: () =>
+        ipcRenderer.invoke("LiteLoader.markdown_it.get_now_config")
 });

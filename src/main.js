@@ -1,15 +1,48 @@
 // 运行在 Electron 主进程 下的插件入口
 const { shell, ipcMain } = require("electron");
+const fs = require("fs");
+const path = require("path");
+
+const pluginDataDir = LiteLoader.plugins.markdown_it.path.plugin;
+const configFilePath = path.join(pluginDataDir, "config.json");
+
+const sampleConfig = {
+    "enableBlack": true,
+    "blackUID": [],
+    "whiteUID": []
+};
+
+function initConfig() {
+    fs.writeFileSync(
+        configFilePath,
+        JSON.stringify(sampleConfig, null, 2),
+        "utf-8"
+    );
+}
+
+function loadConfig() {
+    if (!fs.existsSync(configFilePath)) {
+        initConfig();
+        return sampleConfig;
+    } else {
+        return JSON.parse(fs.readFileSync(configFilePath, "utf-8"));
+    }
+}
 
 onLoad();
 
 // 加载插件时触发
 function onLoad() {
-    const plugin_path = LiteLoader.plugins["markdown_it"].path.plugin;
-    const hljs = require(`${plugin_path}/src/lib/highlight.js`);
-    const katex = require(`${plugin_path}/src/lib/markdown-it-katex.js`);
-    const pangu = require(`${plugin_path}/src/lib/markdown-it-pangu.js`)
-    const mark = require(`${plugin_path}/src/lib/markdown-it.js`)({
+    if (!fs.existsSync(pluginDataDir)) {
+        fs.mkdirSync(pluginDataDir, { recursive: true });
+    }
+    var nowConfig = loadConfig();
+
+    // const plugin_path = LiteLoader.plugins["markdown_it"].path.plugin;
+    const hljs = require(`${pluginDataDir}/src/lib/highlight.js`);
+    const katex = require(`${pluginDataDir}/src/lib/markdown-it-katex.js`);
+    const pangu = require(`${pluginDataDir}/src/lib/markdown-it-pangu.js`)
+    const mark = require(`${pluginDataDir}/src/lib/markdown-it.js`)({
         html: false, // 在源码中启用 HTML 标签
         xhtmlOut: true, // 使用 '/' 来闭合单标签 （比如 <br />）。
         // 这个选项只对完全的 CommonMark 模式兼容。
@@ -50,15 +83,29 @@ function onLoad() {
     })
         .use(katex)
         .use(pangu);
-    ipcMain.handle("LiteLoader.markdown_it.render", (event, content) => {
-        // console.log(`[Markdown-It] Rendering content: \n${mark.render(content)}`);
+
+    ipcMain.handle("LiteLoader.markdown_it.render", async (event, content) => {
         return mark.render(content);
     });
-    ipcMain.handle("LiteLoader.markdown_it.open_link", (event, content) => {
-        if (content.indexOf("http") != 0) {
-            content = "http://" + content;
-        }
+
+    ipcMain.handle("LiteLoader.markdown_it.open_link", async (event, content) => {
+        // if (content.indexOf("http") != 0) {
+        //     content = "http://" + content;
+        // }
         return shell.openExternal(content);
+    });
+
+    ipcMain.handle("LiteLoader.markdown_it.save_config", async (event, config) => {
+        nowConfig = config;
+        fs.writeFileSync(
+            configFilePath,
+            JSON.stringify(config, null, 2),
+            "utf-8"
+        );
+    });
+
+    ipcMain.handle("LiteLoader.markdown_it.get_now_config", async (event, message) => {
+        return nowConfig;
     });
 }
 
