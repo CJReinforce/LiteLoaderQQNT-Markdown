@@ -15,11 +15,11 @@
  
  1. Markdown基础语法/公式渲染：
 
-<img src="https://github.com/d0j1a1701/LiteLoaderQQNT-Markdown/assets/51627740/04c30e63-8dff-43b7-a159-5166ae079bf4" width="71%"> <img src="https://github.com/d0j1a1701/LiteLoaderQQNT-Markdown/assets/51627740/1ee1d124-be34-4385-a3b9-4f856fecfc38" width="21%">
+<img src="https://raw.githubusercontent.com/CJReinforce/LiteLoaderQQNT-Markdown/v4/imgs/1.png" width="71%"> <img src="https://raw.githubusercontent.com/CJReinforce/LiteLoaderQQNT-Markdown/v4/imgs/2.png" width="21%">
 
 2. 黑/白名单设置
 
-![]()
+![Black/WhiteList](https://raw.githubusercontent.com/CJReinforce/LiteLoaderQQNT-Markdown/v4/imgs/3.png)
 
 ## Tips
 
