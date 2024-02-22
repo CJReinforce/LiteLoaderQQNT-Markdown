@@ -2,7 +2,10 @@
 
 ## Introduction
 
-这是一个 [LiteLoaderQQNT](https://github.com/mo-jinran/LiteLoaderQQNT) 插件，使用 [Markdown-it](https://github.com/markdown-it/markdown-it) 为 QQnt 增加 Markdown 和 $\LaTeX$ 渲染功能！
+这是一个 [LiteLoaderQQNT](https://github.com/mo-jinran/LiteLoaderQQNT) 插件，使用 [Markdown-it](https://github.com/markdown-it/markdown-it) 为 QQnt 增加 Markdown 和 $\LaTeX$​ 渲染功能！
+
+> [!NOTE]
+> 此插件最低支持 LiteLoaderQQNT 1.0.0，并且依赖[LLAPI](https://github.com/Night-stars-1/LiteLoaderQQNT-Plugin-LLAPI/tree/main)插件。
 
 ## Features
 
@@ -12,14 +15,14 @@
 - 黑/白名单设置功能，针对窗口设置是否需要启用渲染功能；
 
 ## Demo 
- 
+
  1. Markdown基础语法/公式渲染：
 
-<img src="https://raw.githubusercontent.com/CJReinforce/LiteLoaderQQNT-Markdown/v4/imgs/1.png" width="71%"> <img src="https://raw.githubusercontent.com/CJReinforce/LiteLoaderQQNT-Markdown/v4/imgs/2.png" width="21%">
+<img src="https://raw.githubusercontent.com/CJReinforce/LiteLoaderQQNT-Markdown/v4/imgs/1.png" width="71%" style="zoom: 50%;"> <img src="https://raw.githubusercontent.com/CJReinforce/LiteLoaderQQNT-Markdown/v4/imgs/2.png" width="21%">
 
 2. 黑/白名单设置
 
-![Black/WhiteList](https://raw.githubusercontent.com/CJReinforce/LiteLoaderQQNT-Markdown/v4/imgs/3.png)
+<img src="https://raw.githubusercontent.com/CJReinforce/LiteLoaderQQNT-Markdown/v4/imgs/4.png" alt="Black/WhiteList" style="zoom:45%;" /><img src="https://raw.githubusercontent.com/CJReinforce/LiteLoaderQQNT-Markdown/v4/imgs/3.png" alt="Black/WhiteList" style="zoom:45%;" />
 
 ## Tips
 

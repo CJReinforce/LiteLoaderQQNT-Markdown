@@ -1,7 +1,7 @@
 {
     "manifest_version": 4,
     "type": "extension",
-    "name": "Markdown-it",
+    "name": "markdown-it",
     "slug": "markdown_it",
     "icon": "./icon.png",
     "description": "为 QQNT 提供 Markdown 渲染",

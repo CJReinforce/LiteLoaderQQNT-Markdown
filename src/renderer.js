@@ -1,5 +1,9 @@
 // 运行在 Electron 渲染进程 下的页面脚本
 
+function log(...args) {
+    console.log("\x1b[32m[Markdown-IT]\x1b[0m", ...args);
+}
+
 // 使用 markdown-it 渲染每个span标记的内容
 function render() {
     const elements = document.querySelectorAll(
@@ -41,6 +45,32 @@ function loadCSSFromURL(url) {
     document.head.appendChild(link);
 }
 
+function observeElement(selector, callback, callbackEnable = true, interval = 100, clearIntervalEnable = true) {
+    try {
+        const timer = setInterval(function () {
+            const element = document.querySelector(selector);
+            if (element) {
+                if (callbackEnable) {
+                    callback();
+                }
+                if (clearIntervalEnable) {
+                    clearInterval(timer);
+                }
+            }
+        }, interval);
+    } catch (__) {
+    }
+}
+
+function copyToClipboard(content) {
+    navigator.clipboard.writeText(content).then(function () {
+        log(`Succeed to copy ${content} to clipboard.`);
+    }, function () {
+        log(`Failed to copy ${content} to clipboard.`);
+    });
+}
+
+let appended = true;
 onLoad();
 
 function onLoad() {
@@ -50,12 +80,11 @@ function onLoad() {
     loadCSSFromURL(`local:///${pluginPath}/src/style/hljs-github-dark.css`);
     loadCSSFromURL(`local:///${pluginPath}/src/style/katex.css`);
 
-    const observer = new MutationObserver(async (mutationsList) => {
+    new MutationObserver(async (mutationsList) => {
         var config = await window.markdown_it.getConfig();
 
         const peer = await LLAPI.getPeer();
-        console.log("\x1b[32m[Markdown-IT] peer:\x1b[0m", JSON.stringify(peer, null, 2));
-        //TODO: 右键菜单添加getPeer.uid
+        // log("peer:", JSON.stringify(peer, null, 2));
         
         if (((!config.enableBlack) && (config.whiteUID.includes(peer?.uid))) || (config.enableBlack && (!config.blackUID.includes(peer?.uid)))) {
             for (let mutation of mutationsList) {
@@ -64,17 +93,60 @@ function onLoad() {
                 }
             }
         }
-    });
+    }).observe(document.body, { childList: true, subtree: true });
 
-    const targetNode = document.body;
-    const config = { childList: true, subtree: true };
-    observer.observe(targetNode, config);
+
+    // 右键菜单添加getPeer.uid
+    observeElement('#ml-root .ml-list', function () {
+        document.querySelector('#ml-root .ml-list').addEventListener('mouseup', e => {
+            if (e.button !== 2) {
+                appended = true;
+            } else {
+                appended = false;
+            }
+        });
+
+        new MutationObserver(() => {
+            const qContextMenu = document.querySelector(".q-context-menu");
+            if (appended) {
+                return;
+            }
+            if (qContextMenu) {
+                const tempEl = document.createElement("div");
+                tempEl.innerHTML = document.querySelector(`.q-context-menu :not([disabled="true"])`).outerHTML.replace(/<!---->/g, "");
+                const item = tempEl.firstChild;
+                item.id = "peer-uid";
+                if (item.querySelector(".q-icon")) {
+                    item.querySelector(".q-icon").innerHTML = `<svg fill="#000000" width="800px" height="800px" viewBox="0 0 24 24" role="img" xmlns="http://www.w3.org/2000/svg"><title>Markdown icon</title><path d="M22.269 19.385H1.731a1.73 1.73 0 0 1-1.73-1.73V6.345a1.73 1.73 0 0 1 1.73-1.73h20.538a1.73 1.73 0 0 1 1.73 1.73v11.308a1.73 1.73 0 0 1-1.73 1.731zm-16.5-3.462v-4.5l2.308 2.885 2.307-2.885v4.5h2.308V8.078h-2.308l-2.307 2.885-2.308-2.885H3.461v7.847zM21.231 12h-2.308V8.077h-2.307V12h-2.308l3.461 4.039z"/></svg>`;
+                }
+                if (item.className.includes("q-context-menu-item__text")) {
+                    item.innerText = "复制窗口UID";
+                } else {
+                    item.querySelector(".q-context-menu-item__text").innerText = "复制窗口UID";
+                }
+                item.addEventListener("click", async () => {
+                    qContextMenu.remove();
+                    const peer = await LLAPI.getPeer();
+                    copyToClipboard(peer.uid);
+                });
+                qContextMenu.appendChild(item);
+                appended = true;
+            }
+        }).observe(document.body, { childList: true });
+
+    });
 }
 
 // 打开设置界面时触发
 export async function onSettingWindowCreated(view) {
     var config = await window.markdown_it.getConfig();
-    
+
+    document.querySelectorAll(".nav-item.liteloader").forEach((node) => {
+        if (node.textContent === "markdown-it") {
+            node.querySelector(".q-icon").innerHTML = `<svg fill="#000000" width="800px" height="800px" viewBox="0 0 24 24" role="img" xmlns="http://www.w3.org/2000/svg"><title>Markdown icon</title><path d="M22.269 19.385H1.731a1.73 1.73 0 0 1-1.73-1.73V6.345a1.73 1.73 0 0 1 1.73-1.73h20.538a1.73 1.73 0 0 1 1.73 1.73v11.308a1.73 1.73 0 0 1-1.73 1.731zm-16.5-3.462v-4.5l2.308 2.885 2.307-2.885v4.5h2.308V8.078h-2.308l-2.307 2.885-2.308-2.885H3.461v7.847zM21.231 12h-2.308V8.077h-2.307V12h-2.308l3.461 4.039z"/></svg>`;
+        }
+    });
+
     const navBarItem = `
     <body>
     <div class="config_view">
@@ -93,7 +165,7 @@ export async function onSettingWindowCreated(view) {
             <div class="vertical-list-item">
                 <div style="width:90%;">
                 <h2>黑名单UID</h2>
-                <span class="secondary-text">UID获取详见LLAPI.getPeer().uid，UID之间使用英文逗号隔开</span>
+                <span class="secondary-text">获取UID：点开聊天窗，右键任意消息，点击“复制窗口UID”。多个UID之间使用英文逗号隔开</span>
                 <textarea id="blackUID" style="width: 100%; resize: vertical;" placeholder="u_7x7xxxxx1WA,u_wrbxxxxxSfw,..." rows="4" class="margin-top-large"></textarea>
                 </div>
             </div>
