@@ -26,7 +26,7 @@ function render() {
                 const href = event
                     .composedPath()[0]
                     .href.replace("app://./renderer/", "");
-                await markdown_it.open_link(href);
+                await markdown_it.openLink(href);
                 return false;
             };
         });
@@ -44,19 +44,20 @@ function loadCSSFromURL(url) {
 onLoad();
 
 function onLoad() {
-    const plugin_path = LiteLoader.plugins.markdown_it.path.plugin;
+    const pluginPath = LiteLoader.plugins.markdown_it.path.plugin;
 
-    loadCSSFromURL(`local:///${plugin_path}/src/style/markdown.css`);
-    loadCSSFromURL(`local:///${plugin_path}/src/style/hljs-github-dark.css`);
-    loadCSSFromURL(`local:///${plugin_path}/src/style/katex.css`);
+    loadCSSFromURL(`local:///${pluginPath}/src/style/markdown.css`);
+    loadCSSFromURL(`local:///${pluginPath}/src/style/hljs-github-dark.css`);
+    loadCSSFromURL(`local:///${pluginPath}/src/style/katex.css`);
 
     const observer = new MutationObserver(async (mutationsList) => {
-        var nowConfig = await window.markdown_it.get_now_config();
+        var config = await window.markdown_it.getConfig();
 
         const peer = await LLAPI.getPeer();
         console.log("\x1b[32m[Markdown-IT] peer:\x1b[0m", JSON.stringify(peer, null, 2));
+        //TODO: 右键菜单添加getPeer.uid
         
-        if (((!nowConfig.enableBlack) && (nowConfig.whiteUID.includes(peer?.uid))) || (nowConfig.enableBlack && (!nowConfig.blackUID.includes(peer?.uid)))) {
+        if (((!config.enableBlack) && (config.whiteUID.includes(peer?.uid))) || (config.enableBlack && (!config.blackUID.includes(peer?.uid)))) {
             for (let mutation of mutationsList) {
                 if (mutation.type === "childList") {
                     render();
@@ -72,8 +73,9 @@ function onLoad() {
 
 // 打开设置界面时触发
 export async function onSettingWindowCreated(view) {
-    var nowConfig = await window.markdown_it.get_now_config();
-    const new_navbar_item = `
+    var config = await window.markdown_it.getConfig();
+    
+    const navBarItem = `
     <body>
     <div class="config_view">
         <section class="path">
@@ -109,47 +111,47 @@ export async function onSettingWindowCreated(view) {
     </body>
     `;
     const parser = new DOMParser();
-    const doc2 = parser.parseFromString(new_navbar_item, "text/html");
+    const doc2 = parser.parseFromString(navBarItem, "text/html");
     const node2 = doc2.querySelector("body > div");
 
     // 黑名单开关
-    var q_switch_blacklist = node2.querySelector("#switchBlackList");
-    if (nowConfig.enableBlack == null || nowConfig.enableBlack == true) {
-        q_switch_blacklist.classList.toggle("is-active");
+    var qSwitchBlacklist = node2.querySelector("#switchBlackList");
+    if (config.enableBlack == null || config.enableBlack == true) {
+        qSwitchBlacklist.classList.toggle("is-active");
     }
 
-    q_switch_blacklist.addEventListener("click", async () => {
-        if (q_switch_blacklist.classList.contains("is-active")) {
-            nowConfig.enableBlack = false;
+    qSwitchBlacklist.addEventListener("click", async () => {
+        if (qSwitchBlacklist.classList.contains("is-active")) {
+            config.enableBlack = false;
         } else {
-            nowConfig.enableBlack = true;
+            config.enableBlack = true;
         }
-        q_switch_blacklist.classList.toggle("is-active");
-        await window.markdown_it.save_config(nowConfig);
+        qSwitchBlacklist.classList.toggle("is-active");
+        await window.markdown_it.saveConfig(config);
     });
 
     // 黑名单UID
     var blackUIDTextarea = node2.querySelector("#blackUID");
-    if (nowConfig.blackUID !== undefined) {
-        blackUIDTextarea.value = nowConfig.blackUID;
+    if (config.blackUID !== undefined) {
+        blackUIDTextarea.value = config.blackUID;
     }
 
     blackUIDTextarea.addEventListener("input", async () => {
         var blackUIDList = blackUIDTextarea.value.split('\n').map(uid => uid.trim().replace(/,$/, ''));
-        nowConfig.blackUID = blackUIDList.filter(uid => uid !== '');
-        await window.markdown_it.save_config(nowConfig);
+        config.blackUID = blackUIDList.filter(uid => uid !== '');
+        await window.markdown_it.saveConfig(config);
     });
 
     // 白名单UID
     var whiteUIDTextarea = node2.querySelector("#whiteUID");
-    if (nowConfig.whiteUID !== undefined) {
-        whiteUIDTextarea.value = nowConfig.whiteUID;
+    if (config.whiteUID !== undefined) {
+        whiteUIDTextarea.value = config.whiteUID;
     }
 
     whiteUIDTextarea.addEventListener("input", async () => {
         var whiteUIDList = whiteUIDTextarea.value.split('\n').map(uid => uid.trim().replace(/,$/, ''));
-        nowConfig.whiteUID = whiteUIDList.filter(uid => uid !== '');
-        await window.markdown_it.save_config(nowConfig);
+        config.whiteUID = whiteUIDList.filter(uid => uid !== '');
+        await window.markdown_it.saveConfig(config);
     });
 
     view.appendChild(node2);

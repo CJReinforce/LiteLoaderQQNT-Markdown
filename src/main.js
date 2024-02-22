@@ -6,7 +6,7 @@ const path = require("path");
 const pluginDataDir = LiteLoader.plugins.markdown_it.path.plugin;
 const configFilePath = path.join(pluginDataDir, "config.json");
 
-const sampleConfig = {
+const defaultConfig = {
     "enableBlack": true,
     "blackUID": [],
     "whiteUID": []
@@ -15,7 +15,7 @@ const sampleConfig = {
 function initConfig() {
     fs.writeFileSync(
         configFilePath,
-        JSON.stringify(sampleConfig, null, 2),
+        JSON.stringify(defaultConfig, null, 2),
         "utf-8"
     );
 }
@@ -23,7 +23,7 @@ function initConfig() {
 function loadConfig() {
     if (!fs.existsSync(configFilePath)) {
         initConfig();
-        return sampleConfig;
+        return defaultConfig;
     } else {
         return JSON.parse(fs.readFileSync(configFilePath, "utf-8"));
     }
@@ -36,9 +36,8 @@ function onLoad() {
     if (!fs.existsSync(pluginDataDir)) {
         fs.mkdirSync(pluginDataDir, { recursive: true });
     }
-    var nowConfig = loadConfig();
+    var config = loadConfig();
 
-    // const plugin_path = LiteLoader.plugins["markdown_it"].path.plugin;
     const hljs = require(`${pluginDataDir}/src/lib/highlight.js`);
     const katex = require(`${pluginDataDir}/src/lib/markdown-it-katex.js`);
     const pangu = require(`${pluginDataDir}/src/lib/markdown-it-pangu.js`)
@@ -88,15 +87,15 @@ function onLoad() {
         return mark.render(content);
     });
 
-    ipcMain.handle("LiteLoader.markdown_it.open_link", async (event, content) => {
+    ipcMain.handle("LiteLoader.markdown_it.openLink", async (event, content) => {
         // if (content.indexOf("http") != 0) {
         //     content = "http://" + content;
         // }
         return shell.openExternal(content);
     });
 
-    ipcMain.handle("LiteLoader.markdown_it.save_config", async (event, config) => {
-        nowConfig = config;
+    ipcMain.handle("LiteLoader.markdown_it.saveConfig", async (event, content) => {
+        config = content;
         fs.writeFileSync(
             configFilePath,
             JSON.stringify(config, null, 2),
@@ -104,12 +103,11 @@ function onLoad() {
         );
     });
 
-    ipcMain.handle("LiteLoader.markdown_it.get_now_config", async (event, message) => {
-        return nowConfig;
+    ipcMain.handle("LiteLoader.markdown_it.getConfig", async (event, content) => {
+        return config;
     });
 }
 
-// 这两个函数都是可选的
 module.exports = {
     // onLoad
 };
