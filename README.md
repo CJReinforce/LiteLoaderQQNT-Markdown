@@ -22,7 +22,7 @@
 
 2. 黑/白名单设置
 
-<img src="https://raw.githubusercontent.com/CJReinforce/LiteLoaderQQNT-Markdown/v4/imgs/4.png" alt="Black/WhiteList" style="zoom:45%;" /><img src="https://raw.githubusercontent.com/CJReinforce/LiteLoaderQQNT-Markdown/v4/imgs/3.png" alt="Black/WhiteList" style="zoom:45%;" />
+<img src="https://raw.githubusercontent.com/CJReinforce/LiteLoaderQQNT-Markdown/v4/imgs/4.png" alt="Black/WhiteList" width="45%"><img src="https://raw.githubusercontent.com/CJReinforce/LiteLoaderQQNT-Markdown/v4/imgs/3.png" alt="Black/WhiteList" width="47%">
 
 ## Tips
 
